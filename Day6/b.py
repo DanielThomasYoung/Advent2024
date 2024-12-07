@@ -1,82 +1,54 @@
-from time import sleep
+from copy import deepcopy
 
 
 def main() -> int:
     with open("input.txt", "r") as file:
         lines = file.readlines()
 
-    found_locations = set()
-    guard = [0, 0]
-    guard_history = []
-    direction = [-1, 0]
+    total = 0
+    start = [0, 0]
+    line_array = []
 
     for line_index in range(len(lines)):
+        line_array.append(list(lines[line_index].strip()))
         for char_index in range(len(lines[line_index])):
             if lines[line_index][char_index] == "^":
-                guard = [line_index, char_index]
+                start = [line_index, char_index]
+
+    for line_index in range(len(line_array)):
+        for char_index in range(len(line_array[line_index])):
+            if line_array[line_index][char_index] not in ["^", "#"]:
+                total += try_with_obstacle(line_index, char_index, line_array, start)
+
+    print(total)
+
+
+def try_with_obstacle(line_index, char_index, line_array, start):
+    lines_copy = deepcopy(line_array)
+    lines_copy[line_index][char_index] = "#"
+    guard = start.copy()
+    guard_history = set()
+    direction = [-1, 0]
 
     while True:
         if (
             (guard[0] + direction[0]) < 0
-            or (guard[0] + direction[0]) >= len(lines)
+            or (guard[0] + direction[0]) >= len(lines_copy)
             or (guard[1] + direction[1]) < 0
-            or (guard[1] + direction[1]) >= len(lines[0])
+            or (guard[1] + direction[1]) >= len(lines_copy[0])
         ):
-            break
-        if lines[guard[0] + direction[0]][guard[1] + direction[1]] == "#":
+            return 0
+
+        next_step = [guard[0] + direction[0], guard[1] + direction[1]]
+
+        if lines_copy[next_step[0]][next_step[1]] == "#":
             direction = rotate_right(direction)
         else:
-            if try_rotate(guard, guard_history, direction, lines):
-                found_locations.add(
-                    str([guard[0] + direction[0], guard[1] + direction[1]])
-                )
-
-        guard_history.append(str(guard + direction))
-        guard = [guard[0] + direction[0], guard[1] + direction[1]]
-
-    print(len(found_locations))
-
-
-def try_rotate(guard, guard_history, direction, lines):
-    temp_guard = guard.copy()
-    temp_direction = direction.copy()
-    temp_guard_history = []
-    temp_direction = rotate_right(temp_direction)
-
-    while True:
-        if (
-            (temp_guard[0] + temp_direction[0]) < 0
-            or (temp_guard[0] + temp_direction[0]) >= len(lines)
-            or (temp_guard[1] + temp_direction[1]) < 0
-            or (temp_guard[1] + temp_direction[1]) >= len(lines[0])
-        ):
-            break
-
-        if lines[temp_guard[0] + temp_direction[0]][
-            temp_guard[1] + temp_direction[1]
-        ] == "#" or [
-            temp_guard[0] + temp_direction[0],
-            temp_guard[1] + temp_direction[1],
-        ] == [
-            guard[0] + direction[0],
-            guard[1] + direction[1],
-        ]:
-            temp_direction = rotate_right(temp_direction)
-
-        else:
-            temp_guard = [
-                temp_guard[0] + temp_direction[0],
-                temp_guard[1] + temp_direction[1],
-            ]
-
-            history_key = str(temp_guard + temp_direction)
-            if history_key in temp_guard_history or history_key in guard_history:
-                print("found", temp_guard, temp_direction)
+            history_key = str(guard + direction)
+            if history_key in guard_history:
                 return 1
-
-            temp_guard_history.append(history_key)
-
-    return 0
+            guard_history.add(history_key)
+            guard = next_step
 
 
 def rotate_right(direction):
