@@ -22,7 +22,6 @@ def begin_search(lines, line_index, char_index):
     total = 0
     next_number = "1"
     positions = [[line_index, char_index]]
-    nine_locations = []
     while positions:
         new_positions = []
 
@@ -35,7 +34,6 @@ def begin_search(lines, line_index, char_index):
             ]:
                 if lines[line_offset][char_offset] == next_number:
                     if next_number == "9":
-                        nine_locations.append([line_offset, char_offset])
                         total += 1
                     new_positions.append([line_offset, char_offset])
 
