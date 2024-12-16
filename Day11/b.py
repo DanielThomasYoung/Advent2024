@@ -4,7 +4,7 @@ def main() -> int:
 
     stones = {stone: 1 for stone in line.strip().split()}
 
-    for _ in range(75):
+    for _ in range(1000):
         stones = blink(stones)
 
     print(sum(stones.values()))
