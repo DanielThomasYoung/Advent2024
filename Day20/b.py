@@ -1,88 +1,60 @@
 from dataclasses import dataclass
+from itertools import combinations
 
 
 def main() -> int:
     with open("input.txt", "r") as file:
-        lines = [["#"] * 73]
-        for _ in range(71):
-            lines.append(["#"] + ["."] * 71 + ["#"])
-        lines.append(["#"] * 73)
+        file_lines = file.readlines()
 
-        found = True
-        path = set()
-        while found:
-            coords = file.readline().strip().split(",")
-            lines[int(coords[0]) + 1][int(coords[1]) + 1] = "#"
+    lines = []
 
-            if path and f"{int(coords[0]) + 1} {int(coords[1]) + 1}" not in path:
-                continue
+    for line_index in range(len(file_lines)):
+        lines.append(list(file_lines[line_index].strip()))
+        for char_index in range(len(file_lines[0].strip())):
+            if file_lines[line_index][char_index] == "S":
+                position = [line_index, char_index]
+            elif file_lines[line_index][char_index] == "E":
+                end = [line_index, char_index]
+                lines[line_index][char_index] = "."
 
-            found = False
-            positions = [Position(1, 1, 0, set())]
-            history = set()
-            while positions:
-                cur = min(positions, key=lambda pos: pos.distance)
-                positions.remove(cur)
-                if cur.pos_x == len(lines) - 2 and cur.pos_y == len(lines) - 2:
-                    found = True
-                    path = cur.history
-                    break
+    path = []
+    distance = 0
 
-                key = f"{cur.pos_x} {cur.pos_y}"
-                cur.history.add(key)
-                if key in history:
-                    continue
-                history.add(key)
+    while True:
+        path.append(Path(position[0], position[1], distance))
+        if position[0] == end[0] and position[1] == end[1]:
+            break
 
-                if lines[cur.pos_x + 1][cur.pos_y] != "#":
-                    positions.append(
-                        Position(
-                            cur.pos_x + 1,
-                            cur.pos_y,
-                            cur.distance + 1,
-                            cur.history.copy(),
-                        )
-                    )
+        lines[position[0]][position[1]] = "#"
 
-                if lines[cur.pos_x][cur.pos_y + 1] != "#":
-                    positions.append(
-                        Position(
-                            cur.pos_x,
-                            cur.pos_y + 1,
-                            cur.distance + 1,
-                            cur.history.copy(),
-                        )
-                    )
+        if lines[position[0] + 1][position[1]] == ".":
+            position[0] += 1
+        elif lines[position[0] - 1][position[1]] == ".":
+            position[0] -= 1
+        elif lines[position[0]][position[1] + 1] == ".":
+            position[1] += 1
+        elif lines[position[0]][position[1] - 1] == ".":
+            position[1] -= 1
+        distance += 1
 
-                if lines[cur.pos_x - 1][cur.pos_y] != "#":
-                    positions.append(
-                        Position(
-                            cur.pos_x - 1,
-                            cur.pos_y,
-                            cur.distance + 1,
-                            cur.history.copy(),
-                        )
-                    )
+    total = 0
 
-                if lines[cur.pos_x][cur.pos_y - 1] != "#":
-                    positions.append(
-                        Position(
-                            cur.pos_x,
-                            cur.pos_y - 1,
-                            cur.distance + 1,
-                            cur.history.copy(),
-                        )
-                    )
+    for first, second in combinations(path, 2):
+        cheat_distance = abs(first.x - second.x) + abs(first.y - second.y)
+        if (
+            cheat_distance <= 20
+            and abs(first.steps - second.steps) - cheat_distance >= 100
+        ):
+            total += 1
 
-        print(coords)
+    print(total)
 
 
 @dataclass
-class Position:
-    pos_x: int
-    pos_y: int
-    distance: int
-    history: set
+class Path:
+    y: int
+    x: int
+    steps: int
 
 
 if __name__ == "__main__":

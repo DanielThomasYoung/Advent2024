@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-
 def main() -> int:
     with open("input.txt", "r") as file:
         A = int(file.readline())

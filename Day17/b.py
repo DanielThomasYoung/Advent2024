@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-from time import sleep
-
-
 def main() -> int:
     program = [2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0]
     # program = [0,3,5,4,3,0]
