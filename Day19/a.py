@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from time import sleep
+import functools
+
+linens = []
 
 
 def main() -> int:
+    global linens
     with open("sample.txt", "r") as file:
         file_lines = file.readlines()
 
@@ -11,29 +13,23 @@ def main() -> int:
     total = 0
 
     for line in file_lines[1:]:
-        if recursion(line, linens) > 0:
+        if recursion(line):
             total += 1
 
     print(total)
 
 
-def recursion(line: str, linens):
+@functools.cache
+def recursion(line: str):
     line = line.strip()
     if not line:
         return 1
     total = 0
     for linen in linens:
         if linen == line[0 : len(linen)]:
-            total += recursion(line[len(linen) :], linens)
+            total += recursion(line[len(linen) :])
 
     return total
-
-
-@dataclass
-class Position:
-    pos_x: int
-    pos_y: int
-    distance: int
 
 
 if __name__ == "__main__":
