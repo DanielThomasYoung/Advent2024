@@ -1,37 +1,56 @@
+from copy import deepcopy
+from itertools import combinations
+
+
 def main() -> int:
     with open("input.txt", "r") as file:
         file_lines = file.readlines()
 
-    sequences = {}
+    connections = {}
+    connected = True
 
     for line in file_lines:
-        num = int(line)
-        change = []
-        added = set()
+        chars = line.strip().split("-")
+        if chars[0] in connections:
+            connections[chars[0]].append(chars[1])
+        else:
+            connections[chars[0]] = [chars[1]]
 
-        for _ in range(2000):
-            previous = num % 10
-            num = num ^ (num * 64)
-            num %= 16777216
-            num = num ^ (num // 32)
-            num %= 16777216
-            num = num ^ (num * 2048)
-            num %= 16777216
+        if chars[1] in connections:
+            connections[chars[1]].append(chars[0])
+        else:
+            connections[chars[1]] = [chars[0]]
 
-            final = num % 10
-            change.append(final - previous)
+    count = 3
+    while True:
+        for key, value in connections.items():
+            groups = list(combinations(value, count))
+            connected = True
 
-            if len(change) > 3:
-                key = str(change[-4:])
-                if key not in added:
-                    if key in sequences:
-                        sequences[key] += final
-                    else:
-                        sequences[key] = final
-                added.add(key)
+            for group in groups:
+                group = list(group)
+                copy = deepcopy(group)
 
-            previous = final
-    print(max(sequences.values()))
+                group_a = group.pop()
+                while group and connected:
+                    for group_b in group:
+                        if group_b not in connections[group_a]:
+                            connected = False
+                    group_a = group.pop()
+
+                if connected:
+                    copy.append(key)
+                    copy.sort()
+                    print(copy)
+                    break
+
+            if connected:
+                break
+
+        if connected:
+            count += 1
+        else:
+            break
 
 
 if __name__ == "__main__":
