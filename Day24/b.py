@@ -1,3 +1,7 @@
+from copy import deepcopy
+from itertools import combinations
+
+
 def main() -> int:
     with open("input.txt", "r") as file:
         file_lines = file.readlines()
@@ -16,11 +20,43 @@ def main() -> int:
         split = assignment.split(": ")
         states[split[0]] = int(split[1])
 
-    while True:
-        for line in logic:
-            split = line.split(" -> ")
-            inputs = split[0].split(" ")
-            output = split[1]
+    total_x = ""
+    for i in range(answer_length - 1):
+        add_zero = "" if i // 10 else "0"
+        key = "x" + add_zero + str(i)
+        if key in states:
+            total_x = str(states[key]) + total_x
+        else:
+            complete = False
+            break
+
+    total_y = ""
+    for i in range(answer_length - 1):
+        add_zero = "" if i // 10 else "0"
+        key = "y" + add_zero + str(i)
+        if key in states:
+            total_y = str(states[key]) + total_y
+        else:
+            complete = False
+            break
+
+    target = int(total_x, 2) + int(total_y, 2)
+    print(target)
+    print(bin(target)[2:])
+
+    operations = []
+
+    for line in logic:
+        split = line.split(" -> ")
+        inputs = split[0].split(" ")
+        output = split[1]
+        operations.append([inputs, output])
+
+    complete = False
+    while not complete:
+        for op in operations:
+            inputs = op[0]
+            output = op[1]
 
             if inputs[0] in states and inputs[2] in states:
                 if inputs[1] == "AND":
@@ -42,7 +78,9 @@ def main() -> int:
                 break
 
         if complete:
-            print(int(total, 2))
+            print(total)
+            added = int(total, 2)
+            print(added)
             return
 
 
